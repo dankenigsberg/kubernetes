@@ -23,6 +23,7 @@ import (
 	"net"
 	goruntime "runtime"
 	"strings"
+	"sort"
 	"sync"
 	"time"
 
@@ -451,6 +452,11 @@ func RuntimeHandlers(fn func() []kubecontainer.RuntimeHandler) Setter {
 			return nil
 		}
 		handlers := fn()
+
+		sort.SliceStable(handlers, func(i, j int) bool {
+			return handlers[i].Name < handlers[j].Name
+		})
+
 		node.Status.RuntimeHandlers = make([]v1.NodeRuntimeHandler, len(handlers))
 		for i, h := range handlers {
 			node.Status.RuntimeHandlers[i] = v1.NodeRuntimeHandler{
